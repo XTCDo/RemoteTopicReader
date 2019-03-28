@@ -8,7 +8,8 @@ Print records on a given topic on an Apache Kafka server.
 from argparse import ArgumentParser, RawTextHelpFormatter
 from kafka import KafkaConsumer
 from time import sleep
-
+import configparser
+import os
 
 def check_args(args_to_check):
     """
@@ -16,10 +17,38 @@ def check_args(args_to_check):
     :param args_to_check: The arguments to check
     :return: A boolean indicating if the arguments are valid as well as a message
     """
-    if args_to_check.topic is None and args_to_check.list_topics is False:
-        return False, "--topic/-t is required if --kafka_url/-u is set"
+
+    if args_to_check.config is None:
+        if args_to_check.kafka_url is not None \
+         and args_to_check.topic is None \
+         and args_to_check.list_topics is False:
+            return False, "--topic/-t or --list/-l is required if --kafka_url/-u is set"
+        else:
+            return True, ""
     else:
-        return True, ""
+        return check_config(args_to_check.config)
+
+
+def check_config(config_file_name):
+    config_file = get_config_file(config_file_name)
+
+    if config_file is None:
+        return False, "Configuration file ~/.config/rtr/%s not found" % config_file_name
+
+    if config_file['configuration'] is None:
+        return False, "Configuration file must begin with [configuration]"
+
+    if config_file['configuration']['bootstrap_server'] is None:
+        return False, "Configuration file must contain a bootstrap_server entry"
+
+    return True, ""
+
+
+
+    #if args_to_check.topic is None and args_to_check.list_topics is False:
+    #    return False, "--topic/-t is required if --kafka_url/-u is set"
+    #else:
+    #    return True, ""
 
 
 def list_topics(bootstrap_server):
@@ -95,9 +124,12 @@ def get_arguments():
     :return: A dict containing provided command line arguments
     """
     argument_parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
+
+    argument_parser.add_argument('--config', '-c', help='Path or name of the config file to use', dest='config')
+
     argument_parser.add_argument('--kafka-url', '-u', help='Url to the Apache Kafka server as url:port.\n'
                                                            'The default port is 9092 and does not have to be specified.',
-                                 dest='kafka_url', required=True)
+                                 dest='kafka_url')
 
     argument_parser.add_argument('--topic', '-t', help='Topic to listen to.', dest='topic')
 
@@ -106,10 +138,41 @@ def get_arguments():
     argument_parser.add_argument('--verbose', '-v', help='Print records with their topic', dest='verbosity',
                                  action='store_const', const=1)
 
-    argument_parser.add_argument('--very-verbose', '-vv', help='Print records with their topic, parition and offset.',
+    argument_parser.add_argument('--very-verbose', '-vv', help='Print records with their topic, partition and offset.',
                                  dest='verbosity', action='store_const', const=2)
 
     return argument_parser.parse_args()
+
+
+def get_config_file(config_file_name):
+    config_path = os.path.expanduser('~/.config/rtr/%s' % config_file_name)
+    if os.path.isfile(config_path):
+        config = configparser.ConfigParser()
+        config.read(config_path)
+        return config
+    else:
+        return None
+
+
+def combine_args(arguments, config_file_name):
+    config_file = get_config_file(config_file_name)
+
+    if arguments.kafka_url is None:
+        arguments.kafka_url = config_file['configuration']['bootstrap_server']
+
+    if arguments.topic is None and arguments.list_topics is None and config_file['configuration']['topic'] is not None:
+        arguments.topic = config_file['configuration']['topic']
+
+    return arguments
+
+
+def required_args_present(arguments):
+    if arguments.kafka_url is not None \
+            and arguments.topic is None \
+            and arguments.list_topics is False:
+        return False, "--topic/-t or --list/-l must be set or the configuration file must have a topic entry"
+    else:
+        return True, ""
 
 
 def main():
@@ -122,9 +185,13 @@ def main():
     args_ok, check_args_msg = check_args(args)
 
     if args_ok:
+
+#        if args.config is not None:
+#            args = combine_args(args, args.config)
+
+#        if required_args_present(args):
         if args.list_topics:
             list_topics(args.kafka_url)
-
         else:
             print_records(args.kafka_url, args.topic, args.verbosity)
 
