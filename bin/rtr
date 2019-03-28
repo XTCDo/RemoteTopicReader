@@ -1,0 +1,3 @@
+#!/usr/bin/env python
+import RemoteTopicReader.RemoteTopicReader
+RemoteTopicReader.RemoteTopicReader.main()
