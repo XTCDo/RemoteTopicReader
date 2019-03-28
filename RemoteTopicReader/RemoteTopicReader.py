@@ -13,6 +13,11 @@ import os
 
 
 def check_config(config_file_name):
+    """
+    Check if a configuration file is valid
+    :param config_file_name: name of the configuration file to check
+    :return: True/False for file validity and a message if the file is invalid
+    """
     config_file = get_config_file(config_file_name)
 
     if config_file is None:
@@ -121,6 +126,11 @@ def get_arguments():
 
 
 def get_config_file(config_file_name):
+    """
+    Gets a config file located at ~/.config/rtr/config_file_name
+    :param config_file_name: Name of the config file in the folder ~/.config/rtr/
+    :return: The config file
+    """
     config_path = os.path.expanduser('~/.config/rtr/%s' % config_file_name)
     if os.path.isfile(config_path):
         config = configparser.ConfigParser()
@@ -131,6 +141,13 @@ def get_config_file(config_file_name):
 
 
 def combine_args(arguments, config_file_name):
+    """
+    Combines the commandline arguments with those in the configuration file
+    with the ones provided in the commandline taking precedence
+    :param arguments:
+    :param config_file_name:
+    :return:
+    """
     config_file = get_config_file(config_file_name)
 
     if arguments.kafka_url is None and config_file.has_option('configuration', 'bootstrap_server'):
@@ -143,6 +160,11 @@ def combine_args(arguments, config_file_name):
 
 
 def required_args_present(arguments):
+    """
+    Check if all arguments that are needed for the program to run successfully are present
+    :param arguments: The arguments that have been provided by the config file, the commandline or both combined
+    :return: True/False for if all required arguments are present and a message if not all required args are present
+    """
     if arguments.kafka_url is not None \
             and arguments.topic is None \
             and arguments.list_topics is False:
