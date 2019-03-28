@@ -193,7 +193,7 @@ def init_config_file():
 
 def main():
     """
-    The main loop of the program
+    The main of the program
     """
     args = get_arguments()
 
