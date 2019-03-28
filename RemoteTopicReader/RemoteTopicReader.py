@@ -122,6 +122,9 @@ def get_arguments():
     argument_parser.add_argument('--very-verbose', '-vv', help='Print records with their topic, partition and offset.',
                                  dest='verbosity', action='store_const', const=2)
 
+    argument_parser.add_argument('--init-config', help='Generate an empty config file in ~/.config/rtr/',
+                                 dest='init_config', action='store_true')
+
     return argument_parser.parse_args()
 
 
@@ -175,11 +178,28 @@ def required_args_present(arguments):
         return True, ""
 
 
+def init_config_file():
+    """
+    Generate an empty default configuration file in ~/.config/rtr/empty_config
+    :return: nothing
+    """
+    config_file_path = os.path.expanduser("~/.config/rtr/empty_config")
+    config_file = open(config_file_path, "+w")
+    config_file.write("[configuration]\n")
+    config_file.write("bootstrap_server = \n")
+    config_file.write("topic = ")
+    config_file.close()
+
+
 def main():
     """
     The main loop of the program
     """
     args = get_arguments()
+
+    if args.init_config is True:
+        init_config_file()
+        return 0
 
     if args.config is not None:
         args = combine_args(args, args.config)
