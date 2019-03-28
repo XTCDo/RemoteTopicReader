@@ -4,6 +4,11 @@ from time import sleep
 
 
 def check_args(args_to_check):
+    """
+    Checks if the provided arguments are valid and correct
+    :param args_to_check: The arguments to check
+    :return: A boolean indicating if the arguments are valid as well as a message
+    """
     if args_to_check.topic is None and args_to_check.list_topics is False:
         return False, "--topic/-t is required if --kafka_url/-u is set"
     else:
@@ -11,6 +16,10 @@ def check_args(args_to_check):
 
 
 def list_topics(bootstrap_server):
+    """
+    Prints a list of topics found on the Apache Kafka server on the provided url:port
+    :param bootstrap_server: The url:port of the Apache Kafka server
+    """
     consumer = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[bootstrap_server])
 
     topics = sorted(consumer.topics())
@@ -23,6 +32,15 @@ def list_topics(bootstrap_server):
 
 
 def print_record(record_to_print, verbosity):
+    """
+    Prints a record at a specified level of verbosity
+    For all levels of verbosity the key of record_to_print will be printed only if it is not None
+    If verbosity is None: Print the value and key
+    If verbosity is 1: Print the topic, value and key
+    If verbosity is 2: Print the topic, partition, offset, value and key
+    :param record_to_print: The record to print
+    :param verbosity: The level of verbosity
+    """
     if verbosity is None:
         if record_to_print.key is None:
             print('%s' % record_to_print.value)
@@ -45,6 +63,13 @@ def print_record(record_to_print, verbosity):
 
 
 def print_records(bootstrap_server, topic, verbosity):
+    """
+    Print records on a specified topic found on an Apache Kafka server at the url in bootstrap_server at a specified
+    level of verbosity. Enters an infinite loop that has to be quit by KeyboardInterrupt
+    :param bootstrap_server: The url:port of the Apache Kafka server
+    :param topic: The topic which's records to print
+    :param verbosity: The level of verbosity
+    """
     consumer = KafkaConsumer(topic, group_id='RemoteListener', bootstrap_servers=[bootstrap_server])
     while True:
         try:
@@ -58,6 +83,10 @@ def print_records(bootstrap_server, topic, verbosity):
 
 
 def get_arguments():
+    """
+    Wrapper function for parsing command line arguments
+    :return: A dict containing provided command line arguments
+    """
     argument_parser = ArgumentParser()
     argument_parser.add_argument('--kafka-url', '-u', help='Url to the Apache Kafka server', dest='kafka_url',
                                  required=True)
@@ -68,14 +97,20 @@ def get_arguments():
 
     argument_parser.add_argument('--verbose', '-v', help='Print records verbosely', dest='verbosity',
                                  action='store_const', const=1)
-
+    argument_parser.add_argument()
     argument_parser.add_argument('--very-verbose', '-vv', help='Print records very verbosely', dest='verbosity',
                                  action='store_const', const=2)
+
+    argument_parser
 
     return argument_parser.parse_args()
 
 
 def main():
+    """
+    The main loop of the program
+    """
+
     args = get_arguments()
 
     args_ok, check_args_msg = check_args(args)
