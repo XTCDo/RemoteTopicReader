@@ -97,9 +97,10 @@ def get_arguments():
 
     argument_parser.add_argument('--verbose', '-v', help='Print records verbosely', dest='verbosity',
                                  action='store_const', const=1)
-    argument_parser.add_argument()
+
     argument_parser.add_argument('--very-verbose', '-vv', help='Print records very verbosely', dest='verbosity',
                                  action='store_const', const=2)
+
 
     return argument_parser.parse_args()
 
