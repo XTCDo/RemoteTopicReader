@@ -11,23 +11,6 @@ from time import sleep
 import configparser
 import os
 
-def check_args(args_to_check):
-    """
-    Checks if the provided arguments are valid and correct
-    :param args_to_check: The arguments to check
-    :return: A boolean indicating if the arguments are valid as well as a message
-    """
-
-    if args_to_check.config is None:
-        if args_to_check.kafka_url is not None \
-         and args_to_check.topic is None \
-         and args_to_check.list_topics is False:
-            return False, "--topic/-t or --list/-l is required if --kafka_url/-u is set"
-        else:
-            return True, ""
-    else:
-        return check_config(args_to_check.config)
-
 
 def check_config(config_file_name):
     config_file = get_config_file(config_file_name)
@@ -42,13 +25,6 @@ def check_config(config_file_name):
         return False, "Configuration file must contain a bootstrap_server entry"
 
     return True, ""
-
-
-
-    #if args_to_check.topic is None and args_to_check.list_topics is False:
-    #    return False, "--topic/-t is required if --kafka_url/-u is set"
-    #else:
-    #    return True, ""
 
 
 def list_topics(bootstrap_server):
@@ -157,10 +133,10 @@ def get_config_file(config_file_name):
 def combine_args(arguments, config_file_name):
     config_file = get_config_file(config_file_name)
 
-    if arguments.kafka_url is None:
+    if arguments.kafka_url is None and config_file.has_option('configuration', 'bootstrap_server'):
         arguments.kafka_url = config_file['configuration']['bootstrap_server']
 
-    if arguments.topic is None and arguments.list_topics is None and config_file['configuration']['topic'] is not None:
+    if arguments.topic is None and arguments.list_topics is False and config_file.has_option('configuration', 'topic'):
         arguments.topic = config_file['configuration']['topic']
 
     return arguments
@@ -170,7 +146,9 @@ def required_args_present(arguments):
     if arguments.kafka_url is not None \
             and arguments.topic is None \
             and arguments.list_topics is False:
-        return False, "--topic/-t or --list/-l must be set or the configuration file must have a topic entry"
+        return False, "--topic/-t or --list/-l must be set or the configuration file must have a topic option"
+    elif arguments.kafka_url is None:
+        return False, "--kafka-url/-u must be set or the configuration file must have a bootstrap_server option"
     else:
         return True, ""
 
@@ -179,24 +157,21 @@ def main():
     """
     The main loop of the program
     """
-
     args = get_arguments()
 
-    args_ok, check_args_msg = check_args(args)
+    if args.config is not None:
+        args = combine_args(args, args.config)
+
+    args_ok, args_msg = required_args_present(args)
 
     if args_ok:
-
-#        if args.config is not None:
-#            args = combine_args(args, args.config)
-
-#        if required_args_present(args):
         if args.list_topics:
             list_topics(args.kafka_url)
         else:
             print_records(args.kafka_url, args.topic, args.verbosity)
 
     else:
-        print(check_args_msg)
+        print(args_msg)
 
 
 if __name__ == '__main__':
