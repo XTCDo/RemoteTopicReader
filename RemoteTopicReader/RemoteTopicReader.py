@@ -1,6 +1,8 @@
 """
-Print records on a given topic on an Apache Kafka server.
+Author: xtcdo
+Version: 0.1
 
+Print records on a given topic on an Apache Kafka server.
 """
 
 from argparse import ArgumentParser
