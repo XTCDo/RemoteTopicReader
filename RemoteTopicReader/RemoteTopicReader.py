@@ -5,7 +5,7 @@ Version: 0.1
 Print records on a given topic on an Apache Kafka server.
 """
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawTextHelpFormatter
 from kafka import KafkaConsumer
 from time import sleep
 
@@ -94,21 +94,20 @@ def get_arguments():
     Wrapper function for parsing command line arguments
     :return: A dict containing provided command line arguments
     """
-    argument_parser = ArgumentParser(description=__doc__)
-    argument_parser.add_argument('--kafka-url', '-u', help='Url to the Apache Kafka server as url:port. '
-                                                           'The default port is 9092 and does not have to be specified',
+    argument_parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
+    argument_parser.add_argument('--kafka-url', '-u', help='Url to the Apache Kafka server as url:port.\n'
+                                                           'The default port is 9092 and does not have to be specified.',
                                  dest='kafka_url', required=True)
 
-    argument_parser.add_argument('--topic', '-t', help='Topic to listen to', dest='topic')
+    argument_parser.add_argument('--topic', '-t', help='Topic to listen to.', dest='topic')
 
-    argument_parser.add_argument('--list', '-l', help='List available topics', dest='list_topics', action='store_true')
+    argument_parser.add_argument('--list', '-l', help='List available topics.', dest='list_topics', action='store_true')
 
-    argument_parser.add_argument('--verbose', '-v', help='Print records verbosely', dest='verbosity',
+    argument_parser.add_argument('--verbose', '-v', help='Print records with their topic', dest='verbosity',
                                  action='store_const', const=1)
 
-    argument_parser.add_argument('--very-verbose', '-vv', help='Print records very verbosely', dest='verbosity',
-                                 action='store_const', const=2)
-
+    argument_parser.add_argument('--very-verbose', '-vv', help='Print records with their topic, parition and offset.',
+                                 dest='verbosity', action='store_const', const=2)
 
     return argument_parser.parse_args()
 
