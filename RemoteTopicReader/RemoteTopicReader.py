@@ -1,3 +1,8 @@
+"""
+Print records on a given topic on an Apache Kafka server.
+
+"""
+
 from argparse import ArgumentParser
 from kafka import KafkaConsumer
 from time import sleep
@@ -87,9 +92,10 @@ def get_arguments():
     Wrapper function for parsing command line arguments
     :return: A dict containing provided command line arguments
     """
-    argument_parser = ArgumentParser()
-    argument_parser.add_argument('--kafka-url', '-u', help='Url to the Apache Kafka server', dest='kafka_url',
-                                 required=True)
+    argument_parser = ArgumentParser(description=__doc__)
+    argument_parser.add_argument('--kafka-url', '-u', help='Url to the Apache Kafka server as url:port. '
+                                                           'The default port is 9092 and does not have to be specified',
+                                 dest='kafka_url', required=True)
 
     argument_parser.add_argument('--topic', '-t', help='Topic to listen to', dest='topic')
 
