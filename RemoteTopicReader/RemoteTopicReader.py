@@ -161,6 +161,12 @@ def combine_args(arguments, config_file_name):
 
 
 def topic_exists(bootstrap_url, topic):
+    """
+    Check if a topic exists on a kafka server
+    :param bootstrap_url: The url leading to the kafka server
+    :param topic: The topic of which to check if it exists
+    :return: True/False, True if the topic exists, False if it doesn't
+    """
     topics = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[bootstrap_url]).topics()
     return topic in topics
 
