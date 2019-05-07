@@ -192,9 +192,6 @@ def init_config_file():
 
 
 def main():
-    """
-    The main of the program
-    """
     args = get_arguments()
 
     if args.init_config is True:
