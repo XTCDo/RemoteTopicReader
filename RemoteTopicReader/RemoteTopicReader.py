@@ -32,12 +32,11 @@ def check_config(config_file_name):
     return True, ""
 
 
-def list_topics(bootstrap_server):
+def list_topics(consumer):
     """
     Prints a list of topics found on the Apache Kafka server on the provided url:port
     :param bootstrap_server: The url:port of the Apache Kafka server
     """
-    consumer = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[bootstrap_server])
 
     topics = sorted(consumer.topics())
     print('Topics:')
@@ -79,7 +78,7 @@ def print_record(record_to_print, verbosity):
                                           record_to_print.key, record_to_print.value))
 
 
-def print_records(bootstrap_server, topic, verbosity):
+def print_records(topic, verbosity, consumer):
     """
     Print records on a specified topic found on an Apache Kafka server at the url in bootstrap_server at a specified
     level of verbosity. Enters an infinite loop that has to be quit by KeyboardInterrupt
@@ -87,7 +86,6 @@ def print_records(bootstrap_server, topic, verbosity):
     :param topic: The topic which's records to print
     :param verbosity: The level of verbosity
     """
-    consumer = KafkaConsumer(topic, group_id='RemoteListener', bootstrap_servers=[bootstrap_server])
     while True:
         try:
             for record in consumer:
@@ -162,6 +160,11 @@ def combine_args(arguments, config_file_name):
     return arguments
 
 
+def topic_exists(bootstrap_url, topic):
+    topics = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[bootstrap_url]).topics()
+    return topic in topics
+
+
 def required_args_present(arguments):
     """
     Check if all arguments that are needed for the program to run successfully are present
@@ -172,6 +175,8 @@ def required_args_present(arguments):
             and arguments.topic is None \
             and arguments.list_topics is False:
         return False, "--topic/-t or --list/-l must be set or the configuration file must have a topic option"
+    if not topic_exists(arguments.kafka_url, arguments.topic):
+        return False, "Topic %s does not exist at %s" % (arguments.topic, arguments.kafka_url)
     elif arguments.kafka_url is None:
         return False, "--kafka-url/-u must be set or the configuration file must have a bootstrap_server option"
     else:
@@ -202,12 +207,13 @@ def main():
         args = combine_args(args, args.config)
 
     args_ok, args_msg = required_args_present(args)
-
     if args_ok:
         if args.list_topics:
-            list_topics(args.kafka_url)
+            consumer = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
+            list_topics(consumer)
         else:
-            print_records(args.kafka_url, args.topic, args.verbosity)
+            consumer = KafkaConsumer(args.topic, group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
+            print_records(args.topic, args.verbosity, consumer)
 
     else:
         print(args_msg)
