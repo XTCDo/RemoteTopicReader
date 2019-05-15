@@ -107,8 +107,7 @@ def get_arguments():
     argument_parser.add_argument('--config', '-c', help='Path or name of the config file to use', dest='config')
 
     argument_parser.add_argument('--kafka-url', '-u', help='Url to the Apache Kafka server as url:port.\n'
-                                                           'The default port is 9092 and does not have to be specified.',
-                                 dest='kafka_url')
+                                 'The default port is 9092.', dest='kafka_url')
 
     argument_parser.add_argument('--topic', '-t', help='Topic to subscribe to.', dest='topic')
 
@@ -181,10 +180,13 @@ def required_args_present(arguments):
             and arguments.topic is None \
             and arguments.list_topics is False:
         return False, "--topic/-t or --list/-l must be set or the configuration file must have a topic option"
+
     if not topic_exists(arguments.kafka_url, arguments.topic):
         return False, "Topic %s does not exist at %s" % (arguments.topic, arguments.kafka_url)
+
     elif arguments.kafka_url is None:
         return False, "--kafka-url/-u must be set or the configuration file must have a bootstrap_server option"
+
     else:
         return True, ""
 
@@ -217,6 +219,7 @@ def main():
         if args.list_topics:
             consumer = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
             list_topics(consumer)
+
         else:
             consumer = KafkaConsumer(args.topic, group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
             print_records(args.topic, args.verbosity, consumer)
