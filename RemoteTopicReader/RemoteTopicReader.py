@@ -1,6 +1,6 @@
 """
 Author: xtcdo
-Version: 0.1
+Version: 0.222
 
 Print records on a given topic on an Apache Kafka server.
 """
@@ -181,7 +181,9 @@ def required_args_present(arguments):
             and arguments.topic is None \
             and arguments.list_topics is False:
         return False, "--topic/-t or --list/-l must be set or the configuration file must have a topic option"
-    if not topic_exists(arguments.kafka_url, arguments.topic):
+    elif arguments.list_topics is False \
+            and arguments.topic is not None \
+            and not topic_exists(arguments.kafka_url, arguments.topic):
         return False, "Topic %s does not exist at %s" % (arguments.topic, arguments.kafka_url)
     elif arguments.kafka_url is None:
         return False, "--kafka-url/-u must be set or the configuration file must have a bootstrap_server option"
