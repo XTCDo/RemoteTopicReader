@@ -46,9 +46,9 @@ sudo pip uninstall RemoteTopicReader
 ## Todo
 * Print only last *n* records
 * Listen to multiple records
-* Show proper error message instead of stacktrace when no `NoBrokersAvailable`
 * Show proper error message on timeout when connecting to broker
 * Set timeout as argument
 * Set timeout in configuration file
-~~* Configuration file for often-used connections/topics~~
-~~* Better help function~~
+* ~~Show proper error message instead of stacktrace when no `NoBrokersAvailable`~~
+* ~~Configuration file for often-used connections/topics~~
+* ~~Better help function~~
