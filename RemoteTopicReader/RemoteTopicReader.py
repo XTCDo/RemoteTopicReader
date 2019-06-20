@@ -8,8 +8,10 @@ Print records on a given topic on an Apache Kafka server.
 from argparse import ArgumentParser, RawTextHelpFormatter
 from kafka import KafkaConsumer
 from time import sleep
+from kafka.errors import NoBrokersAvailable
 import configparser
 import os
+import sys
 
 
 def check_config(config_file_name):
@@ -211,10 +213,16 @@ def create_kafka_consumer(bootstrap_servers, topics=None):
     :param bootstrap_servers: List of servers to which to connect
     :param topics: String containing a topic to listen on
     """
-    if topics is None:
-        return KafkaConsumer(group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
-    else:
-        return KafkaConsumer(topics, group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
+    try:
+        if topics is None:
+            return KafkaConsumer(group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
+        else:
+            return KafkaConsumer(topics, group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
+    except NoBrokersAvailable:
+        if len(bootstrap_servers) is 1:
+            bootstrap_servers = bootstrap_servers[0]
+        print("No brokers available at %s" % bootstrap_servers)
+        sys.exit(1)
 
 
 def main():
