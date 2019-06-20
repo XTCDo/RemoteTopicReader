@@ -17,6 +17,20 @@ More information:
 rtr -h
 ```
 
+## Configuration
+An example config file looks like this:
+```
+[configuration]
+bootstrap_server = domain.name:port
+topic = topic_name
+```
+The `topic` config is optional and can be left out.
+
+To generate an empty config file in `~/.config/rtr/`:
+```
+rtr --init-config
+```
+
 ## Installation
 ```bash
 git clone https://github.com/xtcdo/RemoteTopicReader.git
@@ -30,7 +44,11 @@ sudo pip uninstall RemoteTopicReader
 ```
 
 ## Todo
-* Better help function
 * Print only last *n* records
 * Listen to multiple records
-* Configuration file for often-used connections/topics
+* Show proper error message instead of stacktrace when no `NoBrokersAvailable`
+* Show proper error message on timeout when connecting to broker
+* Set timeout as argument
+* Set timeout in configuration file
+~~* Configuration file for often-used connections/topics~~
+~~* Better help function~~
