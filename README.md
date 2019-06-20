@@ -49,6 +49,7 @@ sudo pip uninstall RemoteTopicReader
 * Show proper error message on timeout when connecting to broker
 * Set timeout as argument
 * Set timeout in configuration file
+* Make `~/.config/rtr/` folder if it doesn't exist
 * ~~Show proper error message instead of stacktrace when no `NoBrokersAvailable`~~
 * ~~Configuration file for often-used connections/topics~~
 * ~~Better help function~~
