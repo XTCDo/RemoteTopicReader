@@ -1,6 +1,6 @@
 """
 Author: xtcdo
-Version: 0.222
+Version: 0.2
 
 Print records on a given topic on an Apache Kafka server.
 """
@@ -166,7 +166,7 @@ def topic_exists(bootstrap_url, topic):
     :param topic: The topic of which to check if it exists
     :return: True/False, True if the topic exists, False if it doesn't
     """
-    topics = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[bootstrap_url]).topics()
+    topics = create_kafka_consumer(bootstrap_servers=[bootstrap_url]).topics()
     return topic in topics
 
 
@@ -205,6 +205,18 @@ def init_config_file():
     config_file.close()
 
 
+def create_kafka_consumer(bootstrap_servers, topics=None):
+    """
+    Helper function for instantiating KafkaConsumers
+    :param bootstrap_servers: List of servers to which to connect
+    :param topics: String containing a topic to listen on
+    """
+    if topics is None:
+        return KafkaConsumer(group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
+    else:
+        return KafkaConsumer(topics, group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
+
+
 def main():
     args = get_arguments()
 
@@ -218,11 +230,11 @@ def main():
     args_ok, args_msg = required_args_present(args)
     if args_ok:
         if args.list_topics:
-            consumer = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
+            consumer = create_kafka_consumer(bootstrap_servers=[args.kafka_url])
             list_topics(consumer)
 
         else:
-            consumer = KafkaConsumer(args.topic, group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
+            consumer = create_kafka_consumer(topics=args.topic, bootstrap_servers=[args.kafka_url])
             print_records(args.topic, args.verbosity, consumer)
 
     else:
