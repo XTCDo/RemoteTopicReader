@@ -50,5 +50,5 @@ sudo pip uninstall RemoteTopicReader
 * Show proper error message on timeout when connecting to broker
 * Set timeout as argument
 * Set timeout in configuration file
-~~* Configuration file for often-used connections/topics~~
-~~* Better help function~~
+* ~~Configuration file for often-used connections/topics~~
+* ~~Better help function~~
