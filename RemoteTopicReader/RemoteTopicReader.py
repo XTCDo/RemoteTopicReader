@@ -204,6 +204,12 @@ def init_config_file():
     config_file.write("topic = ")
     config_file.close()
 
+def create_kafka_consumer(bootstrap_servers, topics=None):
+    if topics is None:
+        return KafkaConsumer(group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
+    else:
+        return KafkaConsumer(topics, group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
+
 
 def main():
     args = get_arguments()
@@ -218,11 +224,11 @@ def main():
     args_ok, args_msg = required_args_present(args)
     if args_ok:
         if args.list_topics:
-            consumer = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
+            consumer = create_kafka_consumer(bootstrap_servers=[args.kafka_url]) #KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
             list_topics(consumer)
 
         else:
-            consumer = KafkaConsumer(args.topic, group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
+            consumer = create_kafka_consumer(topics=args.topic, bootstrap_servers=[args.kafka_url]) # KafkaConsumer(args.topic, group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
             print_records(args.topic, args.verbosity, consumer)
 
     else:
