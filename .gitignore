@@ -124,3 +124,6 @@ dmypy.json
 
 # Idea
 .idea/
+
+# Todo files
+TODO.md
