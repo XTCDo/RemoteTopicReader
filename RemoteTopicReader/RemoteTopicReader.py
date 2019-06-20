@@ -1,6 +1,6 @@
 """
 Author: xtcdo
-Version: 0.222
+Version: 0.2
 
 Print records on a given topic on an Apache Kafka server.
 """
@@ -204,7 +204,13 @@ def init_config_file():
     config_file.write("topic = ")
     config_file.close()
 
+
 def create_kafka_consumer(bootstrap_servers, topics=None):
+    """
+    Helper function for instantiating KafkaConsumers
+    :param bootstrap_servers: List of servers to which to connect
+    :param topics: String containing a topic to listen on
+    """
     if topics is None:
         return KafkaConsumer(group_id='RemoteListener', bootstrap_servers=bootstrap_servers)
     else:
