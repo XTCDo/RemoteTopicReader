@@ -1,6 +1,6 @@
 """
 Author: xtcdo
-Version: 0.222
+Version: 0.2
 
 Print records on a given topic on an Apache Kafka server.
 """
