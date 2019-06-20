@@ -81,9 +81,9 @@ def print_record(record_to_print, verbosity):
 def print_records(topic, verbosity, consumer):
     """
     Print records on a specified topic found on an Apache Kafka server at the url in bootstrap_server at a specified
-    level of verbosity. Enters an infinite loop that has to be quit by KeyboardInterrupt
+    level of verbosity. Enters an infinite loop that has to be exited by KeyboardInterrupt
     :param bootstrap_server: The url:port of the Apache Kafka server
-    :param topic: The topic which's records to print
+    :param topic: The topic of which to print the records
     :param verbosity: The level of verbosity
     """
     while True:
@@ -107,10 +107,9 @@ def get_arguments():
     argument_parser.add_argument('--config', '-c', help='Path or name of the config file to use', dest='config')
 
     argument_parser.add_argument('--kafka-url', '-u', help='Url to the Apache Kafka server as url:port.\n'
-                                                           'The default port is 9092 and does not have to be specified.',
-                                 dest='kafka_url')
+                                 'The default port is 9092.', dest='kafka_url')
 
-    argument_parser.add_argument('--topic', '-t', help='Topic to listen to.', dest='topic')
+    argument_parser.add_argument('--topic', '-t', help='Topic to subscribe to.', dest='topic')
 
     argument_parser.add_argument('--list', '-l', help='List available topics.', dest='list_topics', action='store_true')
 
@@ -130,7 +129,7 @@ def get_config_file(config_file_name):
     """
     Gets a config file located at ~/.config/rtr/config_file_name
     :param config_file_name: Name of the config file in the folder ~/.config/rtr/
-    :return: The config file
+    :return: The config file if none exists
     """
     config_path = os.path.expanduser('~/.config/rtr/%s' % config_file_name)
     if os.path.isfile(config_path):
@@ -174,24 +173,27 @@ def topic_exists(bootstrap_url, topic):
 def required_args_present(arguments):
     """
     Check if all arguments that are needed for the program to run successfully are present
-    :param arguments: The arguments that have been provided by the config file, the commandline or both combined
+    :param arguments: The arguments that have been provided by the config file, user input or both combined
     :return: True/False for if all required arguments are present and a message if not all required args are present
     """
     if arguments.kafka_url is not None \
             and arguments.topic is None \
             and arguments.list_topics is False:
         return False, "--topic/-t or --list/-l must be set or the configuration file must have a topic option"
+
     if not topic_exists(arguments.kafka_url, arguments.topic):
         return False, "Topic %s does not exist at %s" % (arguments.topic, arguments.kafka_url)
+
     elif arguments.kafka_url is None:
         return False, "--kafka-url/-u must be set or the configuration file must have a bootstrap_server option"
+
     else:
         return True, ""
 
 
 def init_config_file():
     """
-    Generate an empty default configuration file in ~/.config/rtr/empty_config
+    Generate an empty default configuration file `empty_config` in ~/.config/rtr/
     :return: nothing
     """
     config_file_path = os.path.expanduser("~/.config/rtr/empty_config")
@@ -217,6 +219,7 @@ def main():
         if args.list_topics:
             consumer = KafkaConsumer(group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
             list_topics(consumer)
+
         else:
             consumer = KafkaConsumer(args.topic, group_id='RemoteListener', bootstrap_servers=[args.kafka_url])
             print_records(args.topic, args.verbosity, consumer)
